@@ -1,5 +1,8 @@
 package aplicativoCompleto.dao;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
@@ -16,11 +19,10 @@ public class MongoDao implements IDao {
     private MongoCollection<Document> collection;
 
     public MongoDao() {
-        try (MongoClient mongoClient = MongoClients.create(URI)) {
-            this.database = mongoClient.getDatabase("aplicativo_completo");
+        MongoClient mongoClient = MongoClients.create(URI);
+        this.database = mongoClient.getDatabase("aplicativo_completo");
 
-            this.collection = database.getCollection("items");
-        }
+        this.collection = database.getCollection("items");
     }
 
     @Override
@@ -32,4 +34,25 @@ public class MongoDao implements IDao {
 
         return collection.insertOne(doc).getInsertedId().asObjectId().getValue().toString();
     }
+
+    @Override
+    public List<Produto> listar() {
+        List<Produto> produtos = new LinkedList<>();
+        for (Document doc : collection.find()) {
+            Produto produto = new Produto(
+                    doc.getObjectId("_id").toString(),
+                    doc.getString("nome"),
+                    doc.getInteger("estoque"),
+                    doc.getDouble("preco"));
+            produtos.add(produto);
+        }
+        return produtos;
+    }
+
+    // public static void main(String[] args) {
+    //     MongoDao dao = new MongoDao();
+    //     Produto produto = new Produto("Produto de Teste", 10, 99.99);
+    //     String id = dao.inserir(produto);
+    //     System.out.println("Produto inserido com ID: " + id);
+    // }
 }
