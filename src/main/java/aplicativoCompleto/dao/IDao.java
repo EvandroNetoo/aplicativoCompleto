@@ -5,7 +5,9 @@ import java.util.List;
 import aplicativoCompleto.domain.Produto;
 
 public interface IDao {
-    public List<Produto> listarProdutos();
+    public String inserir(Produto produto);
 
-    public List<Produto> listarProdutos(String ordenarPor, boolean aoContrario);
+    public List<Produto> listar();
+
+    // public List<Produto> listar(String ordenarPor, boolean aoContrario);
 }

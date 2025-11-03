@@ -4,16 +4,16 @@ public class Produto {
     private String id;
     private String nome;
     private int estoque;
-    private Double preco;
+    private double preco;
 
-    public Produto(String id, String nome, int estoque, Double preco) {
+    public Produto(String id, String nome, int estoque, double preco) {
         this.id = id;
         this.nome = nome;
         this.estoque = estoque;
         this.preco = preco;
     }
 
-    public Produto(String nome, int estoque, Double preco) {
+    public Produto(String nome, int estoque, double preco) {
         this.nome = nome;
         this.estoque = estoque;
         this.preco = preco;
@@ -39,7 +39,7 @@ public class Produto {
         this.estoque = estoque;
     }
 
-    public Double getPreco() {
+    public double getPreco() {
         return preco;
     }
 

@@ -1,52 +1,48 @@
 package aplicativoCompleto.windows;
 
+import java.util.Map;
+
 import aplicativoCompleto.control.ControladoraProduto;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Window extends Application {
-    private static ControladoraProduto controladora;
+    private ControladoraProduto controladora;
+
+    public Window() {
+        this.controladora = new ControladoraProduto();
+    }
 
     @Override
     public void start(Stage stage) {
-        new AddProdutoRecord("", 1, 2);
-        TableView<Produto> tabela = new TableView<>();
+        TableView<Map<String, Object>> tabela = new TableView<>();
 
-        // Colunas
-        TableColumn<Produto, String> colunaNome = new TableColumn<>("Nome");
-        colunaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-
-        TableColumn<Produto, Integer> colunaPreco = new TableColumn<>("Preço");
-        colunaPreco.setCellValueFactory(new PropertyValueFactory<>("preco"));
-
-        // Adiciona colunas à tabela
-        tabela.getColumns().addAll(colunaNome, colunaPreco);
+        controladora.camposListados().forEach((label, campo) -> {
+            TableColumn<Map<String, Object>, Object> coluna = new TableColumn<>(label);
+            coluna.setCellValueFactory(new MapValueFactory(campo));
+            tabela.getColumns().add(coluna);
+        });
 
         // Dados
-        ObservableList<Produto> dados = FXCollections.observableArrayList(
-                new Produto("Evandro", "Evandro", 25, 25),
-                new Produto("Evandro", "Evandro", 30, 25),
-                new Produto("Evandro", "Evandro", 22, 25));
+        ObservableList<Map<String, Object>> dados = FXCollections.observableList(controladora.listarProdutos());
 
         tabela.setItems(dados);
 
         VBox root = new VBox(tabela);
+        root.setPadding(new Insets(40));
 
         Scene scene = new Scene(root, 640, 480);
 
         stage.setTitle("Tabela JavaFX sem FXML");
         stage.setScene(scene);
         stage.show();
-    }
-
-    public static void setControladora(ControladoraProduto controladora) {
-        Window.controladora = controladora;
     }
 }
