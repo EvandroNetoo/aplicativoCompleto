@@ -4,11 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.InsertOneResult;
 
 import aplicativoCompleto.domain.Produto;
 
@@ -25,14 +27,18 @@ public class MongoDao implements IDao {
         this.collection = database.getCollection("items");
     }
 
-    @Override
-    public String inserir(Produto produto) {
-        Document doc = new Document("_type", Produto.class.getSimpleName())
+    private Document toDocument(Produto produto) {
+        return new Document("_type", Produto.class.getSimpleName())
                 .append("nome", produto.getNome())
                 .append("estoque", produto.getEstoque())
                 .append("preco", produto.getPreco());
+    }
 
-        return collection.insertOne(doc).getInsertedId().asObjectId().getValue().toString();
+    @Override
+    public void inserir(Produto produto) {
+        Document doc = toDocument(produto);
+        InsertOneResult result = collection.insertOne(doc);
+        produto.setId(result.getInsertedId().asObjectId().getValue().toHexString());
     }
 
     @Override
@@ -49,10 +55,15 @@ public class MongoDao implements IDao {
         return produtos;
     }
 
+    @Override
+    public void remover(String id) {
+        collection.deleteOne(new Document("_id", new ObjectId(id)));
+    }
+
     // public static void main(String[] args) {
-    //     MongoDao dao = new MongoDao();
-    //     Produto produto = new Produto("Produto de Teste", 10, 99.99);
-    //     String id = dao.inserir(produto);
-    //     System.out.println("Produto inserido com ID: " + id);
+    // MongoDao dao = new MongoDao();
+    // Produto produto = new Produto("Produto de Teste", 10, 99.99);
+    // String id = dao.inserir(produto);
+    // System.out.println("Produto inserido com ID: " + id);
     // }
 }

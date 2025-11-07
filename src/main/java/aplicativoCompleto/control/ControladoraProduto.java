@@ -32,6 +32,10 @@ public class ControladoraProduto {
         return campos;
     };
 
+    public List<String> camposOrdenaveis() {
+        return List.of("nome", "preco", "estoque");
+    };
+
     private Map<String, Object> produtoToMap(Produto produto) {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", produto.getId());
@@ -46,11 +50,17 @@ public class ControladoraProduto {
                 Double.valueOf(dados.get("preco")));
     }
 
-    public void adicionar(Map<String, String> dados) {
-        dao.inserir(mapToProduto(dados));
+    public Map<String, Object> adicionar(Map<String, String> dados) {
+        Produto produto = mapToProduto(dados);
+        dao.inserir(produto);
+        return produtoToMap(produto);
     }
 
     public List<Map<String, Object>> listar() {
         return dao.listar().stream().map(this::produtoToMap).toList();
+    }
+
+    public void remover(String id) {
+        dao.remover(id);
     }
 }

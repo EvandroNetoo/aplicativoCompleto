@@ -8,6 +8,7 @@ import aplicativoCompleto.control.ControladoraProduto;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -22,9 +23,20 @@ import javafx.stage.Stage;
 public class Window extends Application {
     private ControladoraProduto controladora;
     TableView<Map<String, Object>> tabela;
+    ObservableList<Map<String, Object>> dados;
 
     public Window() {
         this.controladora = new ControladoraProduto();
+        this.dados = FXCollections.observableArrayList(controladora.listar());
+    }
+
+    private void handleRemover(Map<String, Object> item) {
+        controladora.remover((String) item.get("id"));
+        dados.remove(item);
+    }
+
+    private void handleEditar(Map<String, Object> item) {
+        System.out.println(item);
     }
 
     private VBox criarFormulario() {
@@ -44,15 +56,14 @@ public class Window extends Application {
 
         Button btnEnviar = new Button("Enviar");
         btnEnviar.setOnAction(event -> {
-            Map<String, String> dadosProduto = new java.util.HashMap<>();
+            Map<String, String> dadosItem = new java.util.HashMap<>();
             for (TextField input : inputs) {
                 String nomeCampo = (String) input.getProperties().get("name");
                 String valorCampo = input.getText();
-                dadosProduto.put(nomeCampo, valorCampo);
+                dadosItem.put(nomeCampo, valorCampo);
             }
-            controladora.adicionar(dadosProduto);
-            tabela.setItems(FXCollections.observableList(controladora.listar()));
-            tabela.refresh();
+            dados.add(controladora.adicionar(dadosItem));
+            tabela.sort();
         });
 
         formulario.getChildren().add(btnEnviar);
@@ -67,10 +78,19 @@ public class Window extends Application {
         controladora.camposListados().forEach((label, campo) -> {
             TableColumn<Map<String, Object>, Object> coluna = new TableColumn<>(label);
             coluna.setCellValueFactory(new MapValueFactory(campo));
+            coluna.setSortable(controladora.camposOrdenaveis().contains(campo));
             tabela.getColumns().add(coluna);
         });
 
-        tabela.setItems(FXCollections.observableList(controladora.listar()));
+        TableColumn<Map<String, Object>, Void> colunaAcoes = new TableColumn<>("Ações");
+
+        colunaAcoes.setCellFactory(coluna -> new CelulaAcoes(item -> handleEditar(item), item -> handleRemover(item)));
+
+        tabela.getColumns().add(colunaAcoes);
+
+        tabela.setItems(dados);
+        // tabela.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+
         containerTabela.getChildren().add(tabela);
         return containerTabela;
     }
