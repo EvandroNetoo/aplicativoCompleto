@@ -60,6 +60,11 @@ public class ControladoraProduto {
         return dao.listar().stream().map(this::produtoToMap).toList();
     }
 
+    public void atualizar(String id, Map<String, String> dados) {
+        Produto produto = mapToProduto(dados);
+        dao.atualizar(id, produto);
+    }
+
     public void remover(String id) {
         dao.remover(id);
     }

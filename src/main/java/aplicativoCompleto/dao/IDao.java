@@ -9,7 +9,7 @@ public interface IDao {
 
     public List<Produto> listar();
 
-    void remover(String id);
+    void atualizar(String id, Produto produto);
 
-    // public List<Produto> listar(String ordenarPor, boolean aoContrario);
+    void remover(String id);
 }

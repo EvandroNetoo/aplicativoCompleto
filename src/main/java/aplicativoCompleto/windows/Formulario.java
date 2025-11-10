@@ -18,10 +18,12 @@ import javafx.scene.text.Font;
 public class Formulario {
     private MainApp mainApp;
     List<TextField> inputs;
+    Map<String, Object> item;
 
-    public Formulario(MainApp mainApp) {
+    public Formulario(MainApp mainApp, Map<String, Object> item) {
         this.mainApp = mainApp;
         this.inputs = new LinkedList<>();
+        this.item = item;
     }
 
     public VBox criarFormulario() {
@@ -33,6 +35,9 @@ public class Formulario {
             input.getProperties().put("name", campo);
             inputs.add(input);
             input.setPromptText(label);
+            if (item != null && item.containsKey(campo)) {
+                input.setText(item.get(campo).toString());
+            }
             containerInput.getChildren().addAll(lbl, input);
             formulario.getChildren().add(containerInput);
         });
@@ -49,7 +54,12 @@ public class Formulario {
                 String valorCampo = input.getText();
                 dadosItem.put(nomeCampo, valorCampo);
             }
-            mainApp.controladora.adicionar(dadosItem);
+            if (item != null && item.containsKey("id")) {
+                String id = (String) item.get("id");
+                mainApp.controladora.atualizar(id, dadosItem);
+            } else {
+                mainApp.controladora.adicionar(dadosItem);
+            }
             mainApp.mostrarTelaListagem();
         });
         return btnEnviar;
@@ -74,7 +84,7 @@ public class Formulario {
     }
 
     private Label criarLabelTitulo() {
-        Label titulo = new Label("ADICIONAR");
+        Label titulo = new Label(item == null ? "ADICIONAR" : "EDITAR");
         titulo.setFont(new Font(BaseRoot.TAMANHO_TITUTLO));
         return titulo;
     }

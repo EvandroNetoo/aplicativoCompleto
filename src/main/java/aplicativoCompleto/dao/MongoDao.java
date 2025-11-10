@@ -56,14 +56,15 @@ public class MongoDao implements IDao {
     }
 
     @Override
+    public void atualizar(String id, Produto produto) {
+        Document updatedDoc = toDocument(produto);
+        collection.replaceOne(
+                new Document("_id", new ObjectId(id)),
+                updatedDoc);
+    }
+
+    @Override
     public void remover(String id) {
         collection.deleteOne(new Document("_id", new ObjectId(id)));
     }
-
-    // public static void main(String[] args) {
-    // MongoDao dao = new MongoDao();
-    // Produto produto = new Produto("Produto de Teste", 10, 99.99);
-    // String id = dao.inserir(produto);
-    // System.out.println("Produto inserido com ID: " + id);
-    // }
 }

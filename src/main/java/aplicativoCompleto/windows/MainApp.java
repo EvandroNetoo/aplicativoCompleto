@@ -1,5 +1,7 @@
 package aplicativoCompleto.windows;
 
+import java.util.Map;
+
 import aplicativoCompleto.control.ControladoraProduto;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -33,6 +35,10 @@ public class MainApp extends Application {
     }
 
     protected void mostrarTelaFormulario() {
-        stage.setScene(new Scene(new Formulario(this).getRoot()));
+        stage.setScene(new Scene(new Formulario(this, null).getRoot()));
+    }
+
+    protected void mostrarTelaFormulario(Map<String, Object> item) {
+        stage.setScene(new Scene(new Formulario(this, item).getRoot()));
     }
 }
