@@ -30,7 +30,6 @@ public class Listagem {
     }
 
     private void handleEditar(Map<String, Object> item) {
-        System.out.println(item);
         mainApp.mostrarTelaFormulario(item);
     }
 

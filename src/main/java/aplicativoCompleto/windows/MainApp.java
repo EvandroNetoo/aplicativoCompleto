@@ -2,25 +2,27 @@ package aplicativoCompleto.windows;
 
 import java.util.Map;
 
-import aplicativoCompleto.control.ControladoraProduto;
+import aplicativoCompleto.control.Controladora;
+import aplicativoCompleto.domain.Produto;
+import aplicativoCompleto.domain.Veiculo;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
-    protected ControladoraProduto controladora;
+    protected Controladora<Produto> controladora;
 
     private Stage stage;
 
     public MainApp() {
-        this.controladora = new ControladoraProduto();
+        this.controladora = new Controladora(Produto.class);
     }
 
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        
+
         mostrarTelaListagem();
 
         stage.setTitle("Aplicativo Completo");
