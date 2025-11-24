@@ -70,7 +70,6 @@ public class MongoDao<Item> {
     public List<Item> listar() {
         List<Item> items = new LinkedList<>();
         for (Document doc : collection.find(Filters.eq("_type", classe.getSimpleName()))) {
-            System.err.println(doc.toJson());
             items.add(documentToItem(doc));
         }
         return items;
