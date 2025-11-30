@@ -13,7 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-import aplicativoCompleto.domain.Id;
+import aplicativoCompleto.utils.Id;
 
 public class MongoDao<Item> {
     private static final String URI = "mongodb+srv://evandrorsneto_db_user:0YXChaLo24NUinpy@aplicativocompleto.tc475iw.mongodb.net/?appName=aplicativoCompleto";
@@ -31,7 +31,7 @@ public class MongoDao<Item> {
     private Document itemToDocument(Item produto) {
         Document document = new Document("_type", classe.getSimpleName());
         for (Field field : classe.getDeclaredFields()) {
-            if (field.isAnnotationPresent(aplicativoCompleto.domain.Adicionar.class)) {
+            if (field.isAnnotationPresent(aplicativoCompleto.utils.Adicionar.class)) {
                 try {
                     field.setAccessible(true);
                     document.append(field.getName(), field.get(produto));
@@ -50,7 +50,7 @@ public class MongoDao<Item> {
                 field.setAccessible(true);
                 if (field.isAnnotationPresent(Id.class)) {
                     field.set(item, doc.getObjectId("_id").toHexString());
-                } else if (field.isAnnotationPresent(aplicativoCompleto.domain.Adicionar.class)) {
+                } else if (field.isAnnotationPresent(aplicativoCompleto.utils.Adicionar.class)) {
                     field.set(item, doc.get(field.getName()));
                 }
             }

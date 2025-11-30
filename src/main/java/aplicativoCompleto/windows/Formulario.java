@@ -1,9 +1,11 @@
 package aplicativoCompleto.windows;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import aplicativoCompleto.control.ValidacaoException;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -17,13 +19,15 @@ import javafx.scene.text.Font;
 
 public class Formulario {
     private MainApp mainApp;
-    List<TextField> inputs;
-    Map<String, Object> item;
+    private List<TextField> inputs;
+    private Map<String, Object> item;
+    private Map<String, Label> errosLabels;
 
     public Formulario(MainApp mainApp, Map<String, Object> item) {
         this.mainApp = mainApp;
         this.inputs = new LinkedList<>();
         this.item = item;
+        this.errosLabels = new HashMap<>();
     }
 
     public VBox criarFormulario() {
@@ -33,13 +37,16 @@ public class Formulario {
             Label lbl = new Label(label);
             TextField input = new TextField();
             input.getProperties().put("name", campo);
-            inputs.add(input);
             input.setPromptText(label);
+            Label lblErro = new Label();
+            lblErro.setStyle("-fx-text-fill: red;");
             if (item != null && item.containsKey(campo)) {
                 input.setText(item.get(campo).toString());
             }
-            containerInput.getChildren().addAll(lbl, input);
+            containerInput.getChildren().addAll(lbl, input, lblErro);
             formulario.getChildren().add(containerInput);
+            this.inputs.add(input);
+            this.errosLabels.put(campo, lblErro);
         });
 
         return formulario;
@@ -54,13 +61,23 @@ public class Formulario {
                 String valorCampo = input.getText();
                 dadosItem.put(nomeCampo, valorCampo);
             }
-            if (item != null && item.containsKey("id")) {
-                String id = (String) item.get("id");
-                mainApp.controladora.atualizar(id, dadosItem);
-            } else {
-                mainApp.controladora.adicionar(dadosItem);
+            try {
+                if (item != null && item.containsKey("id")) {
+                    String id = (String) item.get("id");
+                    mainApp.controladora.atualizar(id, dadosItem);
+                } else {
+                    mainApp.controladora.adicionar(dadosItem);
+                }
+                mainApp.mostrarTelaListagem();
+            } catch (ValidacaoException e) {
+                for (String campo : e.getErros().keySet()) {
+                    List<String> mensagensErro = e.getErros().get(campo);
+                    Label lblErro = this.errosLabels.get(campo);
+                    lblErro.setText("");
+                    lblErro.setText(String.join("\n", mensagensErro));
+
+                }
             }
-            mainApp.mostrarTelaListagem();
         });
         return btnEnviar;
     }

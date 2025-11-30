@@ -2,13 +2,17 @@ package aplicativoCompleto.control;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import aplicativoCompleto.dao.MongoDao;
-import aplicativoCompleto.domain.Adicionar;
-import aplicativoCompleto.domain.Listar;
+import aplicativoCompleto.utils.Adicionar;
+import aplicativoCompleto.utils.IValidadorCampo;
+import aplicativoCompleto.utils.Id;
+import aplicativoCompleto.utils.Listar;
 
 public class Controladora<Item extends Object> {
     private MongoDao<Item> dao;
@@ -74,7 +78,9 @@ public class Controladora<Item extends Object> {
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (Field field : classe.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Listar.class) || field.isAnnotationPresent(Adicionar.class)) {
+            if (field.isAnnotationPresent(Listar.class)
+                    || field.isAnnotationPresent(Adicionar.class)
+                    || field.isAnnotationPresent(Id.class)) {
                 try {
                     field.setAccessible(true);
                     Object valor = field.get(item);
@@ -110,28 +116,56 @@ public class Controladora<Item extends Object> {
         return null;
     }
 
-    private Item mapToItem(Map<String, String> dados) {
+    private Item mapToItem(Map<String, String> dados) throws ValidacaoException {
+        Map<String, List<String>> erros = new HashMap();
         try {
             Item item = classe.getDeclaredConstructor().newInstance();
             for (Field field : classe.getDeclaredFields()) {
+                erros.put(field.getName(), new LinkedList<>());
+
                 if (!field.isAnnotationPresent(Adicionar.class))
                     continue;
 
-                String valor = dados.get(field.getName());
+                String valor = dados.get(field.getName()).strip();
+                if (valor == null || valor.isEmpty()) {
+                    erros.get(field.getName()).add("Campo obrigatório");
+                    continue;
+                }
 
                 field.setAccessible(true);
 
-                Object convertido = converterValor(field.getType(), valor);
-                field.set(item, convertido);
+                try {
+                    Object convertido = converterValor(field.getType(), valor);
+                    field.getAnnotation(Adicionar.class).validadores();
+                    for (Class<? extends IValidadorCampo> validadorClass : field
+                            .getAnnotation(Adicionar.class).validadores()) {
+                        IValidadorCampo validador = validadorClass.getDeclaredConstructor()
+                                .newInstance();
+                        String mensagemErro = validador.validar(convertido);
+                        if (mensagemErro != null) {
+                            erros.get(field.getName()).add(mensagemErro);
+                        }
+                    }
+                    field.set(item, convertido);
+                } catch (NumberFormatException e) {
+                    erros.get(field.getName()).add("Digite um valor válido");
+                }
+            }
+
+            boolean temErro = erros.values().stream().anyMatch(lista -> !lista.isEmpty());
+            if (temErro) {
+                throw new ValidacaoException(erros);
             }
             return item;
+        } catch (ValidacaoException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public Map<String, Object> adicionar(Map<String, String> dados) {
+    public Map<String, Object> adicionar(Map<String, String> dados) throws ValidacaoException {
         Item item = mapToItem(dados);
         dao.inserir(item);
         return itemToMap(item);
@@ -141,7 +175,7 @@ public class Controladora<Item extends Object> {
         return dao.listar().stream().map(this::itemToMap).toList();
     }
 
-    public void atualizar(String id, Map<String, String> dados) {
+    public void atualizar(String id, Map<String, String> dados) throws ValidacaoException {
         Item item = mapToItem(dados);
         dao.atualizar(id, item);
     }

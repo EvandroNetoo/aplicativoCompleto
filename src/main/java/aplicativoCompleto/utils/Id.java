@@ -1,4 +1,4 @@
-package aplicativoCompleto.domain;
+package aplicativoCompleto.utils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Adicionar {
-    String label() default "";
+public @interface Id {
+
 }

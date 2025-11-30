@@ -1,4 +1,4 @@
-package aplicativoCompleto.domain;
+package aplicativoCompleto.utils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Id {
-
+public @interface Adicionar {
+    String label() default "";
+    Class<? extends IValidadorCampo>[] validadores() default {};
 }
