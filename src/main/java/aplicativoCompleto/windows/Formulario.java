@@ -73,6 +73,7 @@ public class Formulario {
                 for (String campo : e.getErros().keySet()) {
                     List<String> mensagensErro = e.getErros().get(campo);
                     Label lblErro = this.errosLabels.get(campo);
+                    if (lblErro == null) continue;
                     lblErro.setText("");
                     lblErro.setText(String.join("\n", mensagensErro));
 
